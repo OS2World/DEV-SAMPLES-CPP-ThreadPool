@@ -1,0 +1,13 @@
+CFLAGS= -D__OS2__ -2 -g -c -ml
+LFLAGS= /CO
+
+.cpp.obj :
+	ztc $(CFLAGS) $*.cpp
+
+.obj.exe :
+	blink $*+thrdpool,,,$(LIBS) $(LFLAGS);
+
+thrdtest.exe : thrdtest.obj thrdpool.obj
+
+thrdtest.obj : thrdtest.cpp
+

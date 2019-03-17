@@ -1,0 +1,144 @@
+                                                            CoralSoft, Inc.
+                                                          305 Judson Dr. E.
+                                                     Mobile, AL  36608-3007
+                                                             (205) 344-2251
+---------------------------------------------------------------------------
+                        ThreadPool Class Documentation
+                                   for OS/2
+                                  Prerelease
+---------------------------------------------------------------------------
+
+   ThreadPool is a C++ class designed to improve performance of multi-
+threaded OS/2 applications by starting a 'pool' of threads for execution
+of user functions.  Rather than incurring the overhead of starting a new
+thread each time one is desired, the class chooses an idle thread from
+the pool as a candidate for execution of the user function.  This technique
+is recommended by IBM for improving multi-threaded performance.
+
+   The ThreadPool class also improves upon the standard _beginthread
+function by allowing a C++ function to be started as a thread.  Normally, 
+_beginthread and DosCreateThread both take a "C" function address as a
+parameter.
+
+   The ThreadPool class is destined to become part of a larger C++ class 
+library for OS/2, primarily concerned with the base operating system.
+CoralSoft, Inc. is also developing another OS/2 class library which
+encapsulates Presentation Manager functions into C++ objects.  If you want
+to be notified of availability of these class libraries, please contact
+Steve Horne by one of the following:
+
+- OS/2 Shareware BBS - (703) 385-4325
+
+- Compuserve User ID 71316,1603
+
+- US Mail:
+  CoralSoft, Inc.
+  ATTN: Steve Horne
+  305 Judson Dr. E.
+  Mobile, AL  36608-3007
+
+  (205) 344-2251
+
+---------------------------------------------------------------------------
+   The files included in this ZIP file are:
+
+   THRDPOOL.DOC - Which you are reading now.
+   THRDPOOL.OBJ - The ThreadPool class object file.  This may be explicitly
+                  linked with your application, or may be added to an
+                  object library.
+   THRDTEST.CPP - A test program for the ThreadPool class.
+   THRDTEST.EXE - A pre-built executable for the test program.
+   MAKEFILE     - Makefile for creating THRDTEST.EXE
+
+   Note that the THRDPOOL.OBJ file was created with the LARGE model for
+Zortech C++ V3.0.  The THRDTEST.CPP program uses the Zortech display package
+for screen output.  Release versions of CoralSoft's class libraries will
+supply SMALL and LARGE libraries for Zortech C++ and Borland C++.
+To compile properly, you must have the Zortech Libraries for
+Version 3.0, Release 3, which made multi-tasking actually usable.
+If you don't have this latest release, contact Symantec for an upgrade.
+---------------------------------------------------------------------------
+   To use the ThreadPool class in your application, you must include the
+header file THRDPOOL.HPP.
+
+   The user interface to ThreadPool is documented as follows:
+
+---------------------------------------------------------------------------
+CONSTRUCTOR:
+
+ThreadPool(int count, USHORT stack = 2048);
+
+   Parameters:
+      int count - This parameter specifies the number of threads to start
+                  for the pool.  It should be the maximum number of 
+                  simultaneously executing threads your application will
+                  need.
+      USHORT stack - This parameter specifies the stack size for each thread.
+                  The default value is 2048 bytes.  With the current imple-
+                  mentation, all threads created must have the same stack
+                  size.  Threads will be created with a minimum of 2048 if
+                  a smaller value is specified.
+
+Note that under normal circumstances, only one instance of the TreadPool
+object is needed per application.
+
+---------------------------------------------------------------------------
+MEMBER FUNCTIONS:
+
+USHORT start(void (*func)(PVOID), PVOID arg = NULL, HSEM notify = NULL);
+
+   Parameters:
+      void (*func)(PVOID) - This is the C++ function for multi-threaded
+                  execution.  This function returns void, and takes a
+                  single PVOID argument.  
+      PVOID arg - This is a PVOID (pointer to VOID) that specifies the
+                  argument to be passed to func.  Typically, applications 
+                  pass a pointer to a structure as the argument.  The 
+                  structure must contain all the information the thread 
+                  needs for proper operation.  If the thread needs no
+                  arguments, this parameter may be omitted.
+      HSEM notify - This is either a system semaphore handle or the address
+                  of a RAM semaphore to be cleared when the thread has
+                  terminated execution.  If no termination notification is
+                  desired, this parameter may be omitted.
+
+   Returns:
+      This function will return zero for no error, or a status code as
+      documented below.
+---------------------------------------------------------------------------
+USHORT error(void);
+
+   Parameters:  none
+
+   Returns:
+      The function returns the status code from the last ThreadPool
+      operation, as documented below.
+
+---------------------------------------------------------------------------
+void killAll(void);
+
+   Parameters:  none
+
+   Returns: none
+
+      Normally, the object destructor will clean up the thread pool and 
+      terminate the threads in an orderly manner.  The ThreadPool destructor
+      can only terminate idle threads, that is threads not busy executing
+      a user function.  Use the killAll() function to immediately stop all
+      threads, even those currently executing user functions.  This function
+      uses the DosKillProcess API call.
+
+---------------------------------------------------------------------------
+STATUS CODES:
+   TP_OK - Normal status code (0)
+   TP_NOTHREADS - All threads in the pool are busy.  Either try again later,
+      or modify the application to create more threads in the pool.
+   TP_NOMEMORY - Insufficient memory for some operation.
+
+---------------------------------------------------------------------------
+
+   Please note that this code is supplied as a BETA version of the class
+implementation.  You may use it in any manner as you see fit... however,
+some feedback on its usefulness, stability, or any other comments are
+greatly appreciated.
+
